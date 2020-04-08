@@ -12,7 +12,7 @@ serverSocket = socket(AF_INET, SOCK_STREAM)
 serverPort = 6789
 
 # Bind the socket to server address and server port
-serverSocket.bind(('', serverPort))
+serverSocket.bind(("", serverPort))
 
 # Listen to at most 1 connection at a time
 serverSocket.listen(1)
@@ -31,7 +31,7 @@ while True:
 	# the except clause is executed
 	try:
 		# Receives the request message from the client
-		message = connectionSocket.recv(1024).decode()
+		message = connectionSocket.recv(65536).decode()
 		# Extract the path of the requested object from the message
 		# The path is the second part of HTTP header, identified by [1]
 		filename = message.split()[1]
@@ -42,22 +42,22 @@ while True:
 		outputdata = f.read()
 		# Send the HTTP response header line to the connection socket
 		connectionSocket.send(b"HTTP/1.1 200 OK\r\n\r\n")
- 
+
 		# Send the content of the requested file to the connection socket
-		for i in range(0, len(outputdata)):  
+		for i in range(0, len(outputdata)):
 			connectionSocket.send(outputdata[i].encode())
 		# Send “\r\n” to the connection socket.
 		connectionSocket.send(b"\r\n")
-		
+
 		# Close the client connection socket
 		connectionSocket.close()
 
 	except IOError:
-			# Send HTTP response message for file not found
-			connectionSocket.send(b"HTTP/1.1 404 Not Found\r\n\r\n")
-			connectionSocket.send(b"<html><head></head><body>404 Not Found</body></html>")
-			# Close the client connection socket
-			connectionSocket.close()
+		# Send HTTP response message for file not found
+		connectionSocket.send(b"HTTP/1.1 404 Not Found\r\n\r\n")
+		connectionSocket.send(b"<html><head></head><body>404 Not Found</body></html>")
+		# Close the client connection socket
+		connectionSocket.close()
 
 # Close the server socket
 serverSocket.close()

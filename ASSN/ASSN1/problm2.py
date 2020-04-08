@@ -4,7 +4,7 @@ from socket import *
 argv = sys.argv                      
 host = argv[1]
 port = argv[2]
-timeout = 1 # in second
+timeout = 1  # in second
 
 # Create UDP client socket
 # Note the use of SOCK_DGRAM for UDP datagram packet
@@ -28,7 +28,7 @@ while ptime < 10:
     # Send the UDP packet with the ping message
         clientsocket.sendto(data.encode(), (host, port))
     # Receive the server response
-        message, address = clientsocket.recvfrom(1024)
+        message, address = clientsocket.recvfrom(65536)
     # Received time
         RTTa = time.time()
     # Display the server response as an output
