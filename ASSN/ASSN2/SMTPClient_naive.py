@@ -14,13 +14,25 @@ content = 'It is so hard for me!!!'
 endmsg = '\r\n.\r\n'
 
 
+def find_port():
+    s = socket(AF_INET, SOCK_STREAM)
+    for p in range(1, 2**16):
+        try:
+            s.bind(('', p))
+            s.close()
+            return p
+        except OSError:
+            continue
+
+    return 0
+
+
 def get_ip():
-    ip = gethostbyname(gethostname())
-    if ip == "127.0.0.1" or ip == "localhost":
-        s = socket(AF_INET, SOCK_DGRAM)
-        s.connect(('8.8.8.8', 0))
-        ip = s.getsockname()[0]
-        s.close()
+    # ip = gethostbyname(gethostname())
+    s = socket(AF_INET, SOCK_DGRAM)
+    s.connect(('8.8.8.8', find_port()))
+    ip = s.getsockname()[0]
+    s.close()
     return ip
 
 

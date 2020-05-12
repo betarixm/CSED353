@@ -63,13 +63,19 @@
     \setstretch{1.5}
 
     \section{프로그램 개요}
-     이 프로그램은 Python Scoket을 이용하여 SMTP 프로토콜으로 이메일을 보내는 프로그램이다.
+    이 프로그램은 Python Socket을 이용하여 SMTP 프로토콜으로 이메일을 보내는 프로그램이다.
+    테스트로 사용한 본인의 계정 정보가 포함된 변수 username, password, from\_, to\_는 삭제되어 있으며,
+    여기에 적절한 값들을 넣어서 실행시킬 수 있다.
 
     \section{프로그램의 구조 및 알고리즘}
     \subsection{함수}
+    \subsubsection{find\_port()}
+    함수 get\_ip()를 사용할 때, 소켓이 쓸 수 있는 빈 포트를 찾아서 반환한다. 보통은 포트 0에 연결하면 Linux System API가 빈 포트에 연결시켜주는 등 커널 단위에서 작업을 해주는 경우가 많은데,
+    macOS와 같은 몇몇 시스템에서는 포트 0으로 연결하는 것이 불가능 하므로 직접 설계해주었다.
     \subsubsection{get\_ip()}
     HELO와 EHLO를 보낼 때, 클라이언트의 IP 주소를 보내기 위해 내 IP 주소를 구하는 함수이다.
-    기본적으로는 gethostbyname(gethostname())을 이용하지만, 그 반환값이 로컬 호스트인 경우에는 Google Public DNS에 연결하여 내 IP를 알아낸다.
+    gethostbyname(gethostname())을 이용하는 것이 일반적이지만, 시스템에 따라 그 반환값이 로컬 호스트인 경우나 사용할 수 없는 경우도 있기 때문에,
+    find\_port()로 알아낸 빈 포트로 Google Public DNS에 연결하여 내 IP를 알아낸다.
     \subsubsection{show(t, s)}
     현재 보내거나 받은 데이터를 주어진 예시 코드와 같이 raw string으로 출력시켜주는 함수이다.
     t는 데이터의 type, s는 출력할 데이터이다.
@@ -90,14 +96,15 @@
     그 후, Extended SMTP를 이용하기 위해 ehlo를 보내고, AUTH LOGIN에 username과 password를 base64 인코딩하여 보냄으로써 인증을 한다.
 
     \subsubsection{Send a e-mail to your POSTECH mailbox}
-    mail FROM과 rcpt TO를 이용하여 보내는 사람과 받는 사람을 조회한 후, 메일의 내용을 Subject, From, To를 포함해서 작성한 후 제일 뒤에 \r\n.\r\n을 붙여서 보냄으로써 메일을 발송한다.
+    mail FROM과 rcpt TO를 이용하여 보내는 사람과 받는 사람을 조회한 후, 메일의 내용을 Subject, From, To를 포함해서 작성하여 제일 뒤에 \textbackslash r \textbackslash n.\textbackslash r \textbackslash n을 붙여서 보냄으로써 메일을 발송한다.
     \subsubsection{Destroy the TCP connection}
     quit 신호를 보냄으로써 SMTP 통신을 끝낼 것임을 알리고, wrap\_sock과 sock을 close하여 소켓을 닫는다.
 
     \section{토론 및 개선}
     \begin{itemize}
-        \item 내 IP를 구할 때, gethostbyname(gethostname())를 사용하면 127.0.0.1이 오는 경우가 있는데, 이를 다른 서버에 연결하여 내 IP를 그 소켓에서 얻는 방법으로 해결하였다.
-        \item fstring을 이용하여 가독성을 높였다.
+        \item 내 IP를 구할 때, gethostbyname(gethostname())를 사용하면 127.0.0.1이 오는 경우가 있었는데, 이를 다른 서버에 연결하여 내 IP를 그 소켓에서 얻는 방법으로 해결하였다.
+        \item 빈 포트를 찾는 함수를 설계해보면서, 포트 0으로 연결했을 때 빈 포트로 연결해주는 것이 커널 단에서 지원해주는 기능임을 알았다.
+        \item 코드의 특성상 문자열의 재조합이 잦은 편인데, fstring을 이용하여 가독성을 높였다.
     \end{itemize}
 
 \end{document}
