@@ -1,0 +1,103 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{stackengine}
+\usepackage{minted}
+\usepackage{mathtools}
+\usepackage{graphicx,wrapfig,tikz}
+\usepackage{physics}
+\setlength\intextsep{0pt}
+\usetikzlibrary{calc,hobby}
+\usepackage{pgfplots}
+\usepackage{xcolor}
+\usepackage{xargs}
+\usepackage{kotex}
+\usepackage{mathrsfs} %fourier transform
+\usetikzlibrary{external}
+\usetikzlibrary{arrows}
+\usepackage{setspace}
+\usetikzlibrary{arrows}
+\usepackage{tabstackengine}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{listings}
+\setlist[enumerate]{itemsep=0mm}
+\setlist[enumerate]{label={\arabic*.}}
+
+\definecolor{beta-gray}{rgb}{0.9,0.9,0.9}
+
+\newcommand{\lt}{\;\,}
+\newcommand{\ft}{\quad\!}
+\newcommand{\ot}{\quad\;}
+\newcommand{\dt}{\;\,\;\,}
+\newcommand{\plm}[1]{\setcounter{enumi}{#1 - 1}}
+\newcommand{\nd}{\quad \text{and} \quad}
+\newcommand{\inline}[1]{%
+    \colorbox{beta-gray}{\lstinline[language=C++]{#1}}%
+}
+
+\newenvironment{code}[5]{
+    {
+        \usemintedstyle{xcode}
+        \begin{spacing}{1.0}
+            \let\itshape\relax
+            \inputminted[frame=single, firstline=#3, lastline=#4]{#1}{#2}
+        \end{spacing}
+        \vspace{#5}
+    }
+
+}
+
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+    \author{권민재, 20190084}
+    \title{CSED353 Computer Network Assignment Report}
+    \date{May 13, 2020}
+    \maketitle
+
+    \setstretch{1.5}
+
+    \section{프로그램 개요}
+     이 프로그램은 Python Scoket을 이용하여 SMTP 프로토콜으로 이메일을 보내는 프로그램이다.
+
+    \section{프로그램의 구조 및 알고리즘}
+    \subsection{함수}
+    \subsubsection{get\_ip()}
+    HELO와 EHLO를 보낼 때, 클라이언트의 IP 주소를 보내기 위해 내 IP 주소를 구하는 함수이다.
+    기본적으로는 gethostbyname(gethostname())을 이용하지만, 그 반환값이 로컬 호스트인 경우에는 Google Public DNS에 연결하여 내 IP를 알아낸다.
+    \subsubsection{show(t, s)}
+    현재 보내거나 받은 데이터를 주어진 예시 코드와 같이 raw string으로 출력시켜주는 함수이다.
+    t는 데이터의 type, s는 출력할 데이터이다.
+    \subsubsection{recv\_print(\_sock, size=1024)}
+    socket \_sock에서 size만큼 데이터를 받아서, 받은 데이터를 show를 이용해 출력하는 함수이다.
+    \subsubsection{send\_print(\_sock, msg)}
+    show를 이용해 보낼 데이터를 출력하고, socket \_sock으로 데이터를 보내는 함수이다.
+
+    \subsection{알고리즘}
+    \subsubsection{Establish a TCP connection}
+    Assignment 1에서 했던 것 처럼, AF\_INET과 SOCK\_STREAM을 이용하여 socket을 세팅하고 주어진 주소와 포트에 연결한다.
+
+    \subsubsection{Dialogue with the mail server}
+    HELO를 이용하여 메일 서버와 최초 통신을 한다. 내 IP를 보내기 위해서 함수 get\_ip()를 이용한다.
+
+    \subsubsection{Login using SMTP authentication}
+    STARTTLS를 보내서 TLS 암호화된 통신을 할 것을 알려주고, ssl.wrap\_socket을 이용하여 기존의 소켓이 ssl 통신을 할 수 있도록 만든다.
+    그 후, Extended SMTP를 이용하기 위해 ehlo를 보내고, AUTH LOGIN에 username과 password를 base64 인코딩하여 보냄으로써 인증을 한다.
+
+    \subsubsection{Send a e-mail to your POSTECH mailbox}
+    mail FROM과 rcpt TO를 이용하여 보내는 사람과 받는 사람을 조회한 후, 메일의 내용을 Subject, From, To를 포함해서 작성한 후 제일 뒤에 \r\n.\r\n을 붙여서 보냄으로써 메일을 발송한다.
+    \subsubsection{Destroy the TCP connection}
+    quit 신호를 보냄으로써 SMTP 통신을 끝낼 것임을 알리고, wrap\_sock과 sock을 close하여 소켓을 닫는다.
+
+    \section{토론 및 개선}
+    \begin{itemize}
+        \item 내 IP를 구할 때, gethostbyname(gethostname())를 사용하면 127.0.0.1이 오는 경우가 있는데, 이를 다른 서버에 연결하여 내 IP를 그 소켓에서 얻는 방법으로 해결하였다.
+        \item fstring을 이용하여 가독성을 높였다.
+    \end{itemize}
+
+\end{document}

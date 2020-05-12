@@ -2,13 +2,13 @@ import smtplib
 import logging
 from email.message import EmailMessage
 
-username = 'your_postech_id@postech.ac.kr'
-password = 'your_password'              # IMPORTANT NOTE!!!!!!!!!!: PLEASE REMOVE THIS FIELD WHEN YOU SUBMIT!!!!!
+username = ''
+password = ''            # IMPORTANT NOTE!!!!!!!!!!: PLEASE REMOVE THIS FIELD WHEN YOU SUBMIT!!!!!
 
 msg = EmailMessage()
 msg['Subject'] = 'Computer Network Assignment2 - Email Client'
-msg['From'] = 'your_postech_id@postech.ac.kr'
-msg['To'] = 'your_postech_id_or_your_friend\'s@postech.ac.kr'
+msg['From'] = ''
+msg['To'] = ''
 msg.set_content('It is so hard for me!!!')
 
 # 1. Connect to the mail server
