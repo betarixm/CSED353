@@ -1,0 +1,79 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{kotex}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{amsmath}
+
+\begin{document}
+
+    \titleformat{\section}
+    {\normalfont\bfseries}{Problem \thesection. }
+    {0em}{}
+
+    \author{권민재, 20190084}
+    \title{Assignment 4 \\ \vspace{0.5em}
+        \large CSED353 Computer Network }
+    \date{June 20, 2020}
+    \maketitle
+
+    \section{}
+    \indent Suppose the information content of a packet is the bit pattern 1010 0111 0101 1001 and an even parity scheme is being used. What would the value of the field containing the parity bits be for the case of a two-dimensional parity scheme? Your answer should be such that a minimum-length checksum field is used.\\
+
+    \noindent
+    \textbf{Answer} \\
+    Even parity scheme을 사용하므로, 우선 4개의 비트에 대해서 한 row에 있는 1의 개수가 짝수 개가 되도록 1 또는 0의 parity bit를 설정해야 한다. 모든 과정을 마치고, column에 대해서도 같은 행위를 수행하여 parity bit들을 구한다. 이를 표로 나타내면 아래와 같다.
+
+    \begin {center}
+    \begin{tabular}{c c c c | c}
+        \hline
+        1 & 0 & 1 & 0 & 0 \\
+        0 & 1 & 1 & 1 & 1 \\
+        0 & 1 & 0 & 1 & 0 \\
+        1 & 0 & 0 & 1 & 0 \\
+        \hline
+        0 & 0 & 0 & 1 & 1 \\
+        \hline
+    \end {tabular}
+    \end {center}
+    즉, 주어진 bit pattern에 2차원 패리티 비트를 적용한 결과는 10100 01111 01010 10010 00011과 같다.
+    \vspace{2em}
+    \section{}
+    For the generator G (= 1001) of the CRC, answer the following questions.
+    \begin{enumerate}[label=\alph*. ]
+        \item Why can it detect any single bit error in data D?
+        \item Can the above G detect any odd number of bit errors? Why?
+    \end{enumerate}
+
+    \noindent
+    \textbf{Answer} \\
+    \begin{enumerate} [label=\alph*. ]
+        \item $d$는 $D$의 길이, $R$는 CRC, $r$은 CRC의 길이를 뜻하며, $0 \leq k < d+r$이다. $k$번째 비트에서 single bit error가 일어났을 때, 받은 데이터는 $R=(D\cdot 2r) XOR (R + 2^k)$과 같이 쓸 수 있다. 이때, $R$이 $G$로 나눠떨어지지 않는 것은 자명하기 때문에 CRC로 single bit error를 탐지할 수 있는 것을 볼 수 있다.
+        \item $G$가 $11_{(2)}$로 나눠지지만, 홀수 개의 1로 구성된 그 어떤 수도 $11_{(2)}$로 나눠지지 않는다는 점에 주목해보자. 이때, odd-number bit error들을 가지고 있는 시퀀스는 11로 나눠지지 않으므로, G로도 나눠지지 않는다. 즉, CRC를 이용해서 any odd number of bit errors를 탐지할 수 있는 것을 알 수 있다.
+    \end {enumerate}
+    \vspace{2em}
+    \section{}
+    \begin{enumerate}[label=\alph*. ]
+        \item Recall that when there are N active nodes, the efficiency of slotted ALOHA is $Np(1−p)^{N-1}$. Find the value of p that maximizes this expression.\\
+        \item Using the value of p found in (a), find the efficiency of slotted ALOHA by letting N approach infinity. Hint: $(1−1/ N)^N$ approaches $1/e$ as $N$ approaches infinity.\\
+    \end {enumerate}
+    \noindent
+    \textbf{Answer} \\
+    \begin{enumerate} [label=\alph*. ]
+        \item Let $E(p) = Np(1-p)^{N-1}$, and differentiate it.
+              \begin{align*}
+                  E'(p) &= N(1-p)^{N-1} - Np(N-1)(1-p)^{N-2} \\
+                  &= N(1-p)^{N-2}((1-p) - p(N-1)) \\
+                  &= N(1-p)^{N-2}(1-Np)
+              \end{align*}
+              이때, $E'(p)$가 0이 되도록 하는 $p$ 값은 $\frac{1}{N}$이고, 이때 문제의 식(the efficiency of slotted ALOHA)이 최댓값을 가지는 것을 알 수 있다.
+        \item $p=\frac{1}{N}$일 때,
+              \begin{align*}
+                   E(p) &= N\frac{1}{N}(1-\frac{1}{N})^{N-1} = (1-\frac{1}{N})^{N-1} = \frac{(1-\frac{1}{N})^{N}}{(1-\frac{1}{N})} \\
+                   \lim_{N\to\infty} E(p) &= \frac{\frac{1}{e}}{1} = \frac{1}{e}
+              \end{align*}
+              즉, $N$이 무한대로 갈 때, slotted ALOHA의 효율은 $\frac{1}{e}$이다.
+    \end {enumerate}
+
+
+\end{document}
