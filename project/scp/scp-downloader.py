@@ -46,7 +46,7 @@ i = f.read().split("\n")
 id = i[0]
 pw = i[1]
 
-l = ["/etc/config/dhcp", "/etc/config/firewall", "/etc/config/network", "/etc/config/openvpn", "/etc/config/wireless", "/etc/squid/squid.conf", "/etc/nginx/nginx.conf", "/etc/firewall.user"]
+l = ["/etc/config/dhcp", "/etc/config/firewall", "/etc/config/network", "/etc/config/openvpn", "/etc/config/wireless", "/etc/squid/squid.conf", "/etc/nginx/nginx.conf", "/etc/firewall.user", "/etc/dnsmasq.conf"]
 
 ssh_manager = SSHManager()
 ssh_manager.create_ssh_client("plus10.postech.ac.kr", id, pw)
