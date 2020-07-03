@@ -1,0 +1,15 @@
+# This file is interpreted as shell script.
+# Put your custom iptables rules here, they will
+# be executed with each firewall (re-)start.
+
+# Internal uci firewall chains are flushed and recreated on reload, so
+# put custom rules into the root chains e.g. INPUT or FORWARD or into the
+# special user chains, e.g. input_wan_rule or postrouting_lan_rule.
+
+# OpenVPN Remote Access & Routing Rule
+iptables -I INPUT 1 -p udp --dport 1194 -j ACCEPT
+iptables -I INPUT 1 -p tcp --dport 1194 -j ACCEPT
+iptables -I FORWARD 1 --source 10.8.0.0/24 -j ACCEPT
+iptables -I FORWARD -i eth0 -o tun0 -j ACCEPT
+iptables -I FORWARD -i tun0 -o eth0 -j ACCEPT
+iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE

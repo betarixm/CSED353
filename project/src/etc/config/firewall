@@ -1,0 +1,30 @@
+
+config defaults
+	option syn_flood '1'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+
+config include
+	option path '/etc/firewall.user'
+
+config zone
+	option network 'lan'
+	option input 'ACCEPT'
+	option forward 'REJECT'
+	option name 'lan'
+	option output 'ACCEPT'
+	option masq '1'
+	option mtu_fix '1'
+
+config zone
+	option network 'wifi'
+	option input 'ACCEPT'
+	option name 'wifi'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+
+config forwarding
+	option dest 'lan'
+	option src 'wifi'
+

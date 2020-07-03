@@ -1,0 +1,6 @@
+iptables -I INPUT 1 -p udp --dport 1194 -j ACCEPT
+iptables -I INPUT 1 -p tcp --dport 1194 -j ACCEPT
+iptables -I FORWARD 1 --source 10.8.0.0/24 -j ACCEPT
+iptables -I FORWARD -i eth0 -o tun0 -j ACCEPT
+iptables -I FORWARD -i tun0 -o eth0 -j ACCEPT
+iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE

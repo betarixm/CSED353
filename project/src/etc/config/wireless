@@ -1,0 +1,18 @@
+
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option channel '11'
+	option hwmode '11g'
+	option path 'platform/soc/3f300000.mmc/mmc_host/mmc1/mmc1:0001/mmc1:0001:1'
+	option htmode 'HT20'
+	option disabled '0'
+	option country 'KR'
+
+config wifi-iface 'default_radio0'
+	option device 'radio0'
+	option network 'wifi'
+	option mode 'ap'
+	option ssid 'beta'
+	option key 'dlwlrmaiu'
+	option encryption 'psk2'
+
