@@ -76,7 +76,7 @@
     이 프로젝트에서는 single board computer로 Raspberry Pi3 B 모델을 사용하였으며, OpenWrt를 운영체제로 사용하였다. \\
     이 WiFi AP는 AP의 서브넷과의 동일한 환경을 제공하기 위한 VPN을 제공하며, caching을 지원하는 proxy server의 역할도 수행한다.
     그리고 더 나아가, 포스텍 내 HTTP 사이트에 대한 캐싱도 이 AP가 수행할 수 있도록 기능을 추가하였다.
-    이러한 기능을 추가하기 위해 OpenVPN, Squid, NginX 등의 소프트웨어가 사용되었으며, 이들의 효율적인 관리를 위해 luci 또한 이용하였다.
+    이러한 기능을 추가하기 위해 OpenVPN, Squid, Nginx 등의 소프트웨어가 사용되었으며, 이들의 효율적인 관리를 위해 luci 또한 이용하였다.
 
 
     \section{구조}
@@ -91,20 +91,22 @@
     \subsection{OpenVPN}
     OpenVPN은 VPN을 제공하는 프로토콜과 프로그램을 일컫는다.
     VPN을 naive하게 직접 구현하는 것은 상당한 시간이 걸리고, 보안상 믿을 수 없는 시스템이 만들어질 수 있기 때문에,
-    대중화된 프로그램을 사용하는 것으로 결정하였다.
-    OpenVPN은 OpenSSL을 이용하여 통신을 암호화하기 때문에 안전하고, 많은 플랫폼에서 사용할 수 있다는 장점이 있어서
-    OpenVPN을 이용하여 VPN 서버 기능을 이 WiFi AP에 탑재하였다.
+    대중화된 프로그램을 사용하는 것으로 결정하였다. 여러 대중화된 프로그램들 중에서,
+    OpenVPN이 OpenSSL을 이용하여 통신을 암호화하기 때문에 안전하고, 많은 플랫폼에서 사용할 수 있다는 장점이 있어서
+    OpenVPN을 이용하여 VPN Server를 WiFi AP에 탑재하는 것으로 결정했다.
     \subsection{Squid}
-    Squid는 프록시 서버 역할을 수행하며, 부가적으로 웹 캐시의 기능도 한다.
-    하나의 프로그램으로 프록시와 웹 캐시 기능을 동시에 제공할 수 있다는 장점이 있어서 Squid를 이용하여 WiFi AP에 프록시 기능을 탑재하였다.
+    Squid는 대표적인 proxy 프로그램으로, caching 기능을 지원하여 웹 서버의 반복적인 request를 막고, 트래픽을 줄여줄 수 있도록 도와주는 프로그램이다.
+    Squid를 이용한 proxy를 WiFi AP에 탑재함으로써 프록시에 연결함으로써 트래픽 부하를 줄이고, 캐시를 이용하여 더 빠르게 인터넷을 할 수 있도록 하기 위해
+    해당 기능을 WiFi AP에 추가하기로 결정하였다.
     \subsection{Nginx}
-    Nginx는 최근 많이 사용되는 웹 서버 소프트웨어이다. Nginx는 다른 웹 서버 소프트웨어보다 강력한 리버스 프록시 기능을 제공한다.
-    Nginx의 해당 기능을 통해 WiFi AP의 사용자들에게 *.postech.ac.kr에 대한 웹 캐시를 제공하고자 한다.
+    Nginx는 최근 많이 사용되는 웹 서버 소프트웨어로, 가벼우면서 높은 성능에 강점을 가진다. Nginx은 웹 서버 프로그램으로서 여러 기능을 수행하며, Squid와 같이
+    리버스 프록시나 캐싱과 같은 역할도 할 수 있다. 그래서 이 점을 이용하여 Nginx를 WiFi AP에 탑재해서
+    WiFi AP의 클라이언트들에게 *.postech.ac.kr에 대한 웹 캐시를 제공하고자 한다.
     \section{기능}
     모든 파일의 내용은 설정 파일들 중 중요하다고 생각되는 일부 부분들만 발췌한 것이다.
     \subsection{Wifi Routed AP}
     우선 lan과 wifi, 두 개의 인터페이스를 만들고, wifi에게 서브넷을 부여하였다. 그 후, wifi의 패킷을 lan으로 포워딩시키고,
-    lan에서 MASQUERADE를 통해 nat를 해석하게 만들어서 Routed WiFi AP 기능을 구현하였다.
+    lan에서 MASQUERADE를 통해 NAT를 구현함으로써 WiFi AP의 기능을 수행할 수 있도록 만들었다.
     \subsubsection{Interface}
     \textbf{lan}\\
     \code{cpp}{network}{10}{17}{5pt}
@@ -112,26 +114,25 @@
     학교 내에서 사용할 예정이기 때문에, 임시로 학교 내의 static ip를 할당하였다. \\ \\
     \textbf{wifi}\\
     \code{cpp}{network}{19}{22}{5pt}
-    wifi 인터페이스는 Raspberry Pi가 무선으로 신호를 보낼 인터페이스를 말한다. 이 WiFi는 192.168.2.0/24의 내부 망 대역을 사용할 것이며,
-    AP는 192.168.2.1을 할당받을 수 있도록 설정하였다.
+    wifi 인터페이스는 Raspberry Pi가 WiFi 무선 신호를 송수신하는 인터페이스를 말한다. 이 WiFi는 192.168.2.0/24의 내부 망 대역(서브넷)을 사용할 것이며,
+    AP가 WiFi의 게이트웨이로서 192.168.2.1을 할당받을 수 있도록 설정하였다.
 
     \subsubsection{dhcp}
     \code{cpp}{dhcp}{23}{32}{5pt}
-    lan 인터페이스의 경우에는 static ip를 사용하고 있기 때문에, dhcp를 ignore 하도록 설정하였다.
-    반면에, wifi의 경우, routed ap 기능을 수행하기 위해서는 dhcp에 기반한 nat가 필수적이기 때문에 위와 같이 dhcp 서버를 설정하였다.
+    lan 인터페이스의 경우에는 static ip를 사용하고 있기 때문에, DHCP를 ignore 하도록 설정하였다.
+    반면에, wifi의 경우, routed WiFi AP라는 역할을 수행하기 위해서는 DHCP에 기반한 NAT가 필수적이기 때문에 위와 같이 DHCP 서버를 설정하였다.
 
     \subsubsection{firewall}
-    \code{cpp}{firewall}{11}{30}{5pt}
+    \code{cpp}{firewall}{10}{30}{5pt}
     기본적으로, wifi의 패킷을 lan으로 포워딩하도록 설정하여 wifi를 통해 무선 인터넷을 사용할 수 있도록 구축하였다.
-    그 후, lan에서는 nat가 적용되어 있는 wifi의 패킷들을 해석할 수 있어야 하게 때문에,
-    option masq '1'을 통해 MASQUERADE를 활성화하여 nat을 처리할 수 있도록 만들었다.
-
-
+    그 후, lan에서는 wifi의 패킷들을 변환해서 보내는 NAT를 구현해야하기 때문에,
+    option masq '1'을 통해 MASQUERADE를 활성화하여 NAT를 처리할 수 있도록 만들었다.
 
     \subsubsection{wireless}
     \code{cpp}{wireless}{10}{16}{5pt}
-    wireless에서는 SSID와 암호화 방식을 설정해주었으며, 보안성을 갖추기 위해서 psk2 방식을 선택하였다. 'CENSORED'는 실제로 사용하고 있는 암호가 아니다.
-
+    wireless는 클라이언트가 어떻게 접속할지, 쉽게 말해서 클라이언트의 눈에 보이는 부분을 설정하는 곳이다.
+    wireless에서 SSID와 암호화 방식을 설정해주었으며, 보안성을 갖추기 위해서 psk2 방식을 선택하였다.
+    'CENSORED'는 실제로 사용하고 있는 암호가 아닌, 임의의 암호이다.
 
 
     \subsection{VPN}
@@ -139,13 +140,13 @@
     \subsubsection{openvpn}
     \code{cpp}{openvpn}{}{}{5pt}
     openvpn에서 주로 쓰는 포트인 1194번 포트에서 tcp 방식으로 vpn이 작동할 수 있도록 설정하였다.
-    각종 인증서와 키는 easyrsa를 통해 발급받았으며, 10.8.0.0/24 서브넷에서 vpn client들이 각자의 ip 주소를 할당받도록 설정하였다.
+    각종 인증서와 키는 easyrsa를 통해 generate 했으며, 10.8.0.0/24 서브넷에서 vpn client들이 각자의 ip 주소를 할당받도록 설정하였다.
     이를 위해 dhcp-option을 통해 dhcp가 작동되도록 하였고, 클라이언트들의 모든 트래픽을 받기 위해 "redirect-gateway def1" 옵션을 추가하였다.
     테스트의 편의를 위해 같은 클라이언트 인증서로 여러 기기가 접속하는 것을 허용하기 위해 duplicate\_cn을 활성화시켰으며, lzo를 통해 압축된 패킷을 주고받도록 하게 만들었다.
     \subsubsection{firewall.user}
     \code{cpp}{firewall.user}{}{}{5pt}
     openvpn으로 통신되는 데이터들을 포워딩하기 위한 규칙을 설정하였다. 10.8.0.0/24 서브넷에서 위에서 정의한 tun0과 eth0(lan) 사이에 패킷이 오고 갈 수 있도록 설정하였고,
-    이때 내부 망의 ip를 해석하기 위해 MASQUERADE도 활성화하였다.
+    이때 NAT와 같은 기술이 필요하기 때문에 MASQUERADE도 활성화하였다.
 
     \subsection{Proxy with Caching}
     Squid를 이용하여 WiFi AP에 프록시 기능을 추가하였으며, 해당 프록시에서 Web caching을 할 수 있도록 설정하였다.
@@ -159,24 +160,26 @@
 
     \subsection{Caching}
     dnsmasq.conf를 통해 *.postech.ac.kr로 가는 패킷을 192.168.2.1, 즉 WiFi AP로 우회시킨 다음에 nginx에서 캐시가 있다면 캐시를 돌려주고,
-    아닐 경우에 nginx에서 proxy path를 수행하게 하여 http에 대한 웹 캐시를 구현하였다.
+    아닐 경우에 nginx에서 proxy path를 수행하게 하여 *.postech.ac.kr의 HTTP 페이지에 대한 웹 캐시를 구현하였다.
     \subsubsection{nginx.conf}
     \code{cpp}{nginx.conf}{}{}{5pt}
     기본 resolver는 포스텍의 DNS로 설정하였으며, /nginx-cache/POSTECH/에 *.postech.ac.kr 페이지들의 캐시들이 저장되도록 설정하였다.
     WiFi AP의 80포트로 *.postech.ac.kr에 대한 요청이 들어왔을 경우, proxy\_cache\_valid 한 경우에 캐시를 클라이언트에게 돌려주고,
     아닌 경우에는 원래 경로로 proxy\_pass를 수행하여 클라이언트의 요청을 처리한다.
-    원래대로라면 웹 규약에 맞게 X-Forwarded-For 헤더를 추가하는 것이 맞지만, HTTP 400 ERROR가 계속적으로 발생하는 원인이 되어 활성화시키지 않았다.
+    원래대로라면 웹 규약에 맞게 X-Forwarded-For 헤더를 추가하는 것이 적절하겠지만,
+    400 Bad Request (Request Header or Cookie too Large) 에러가 계속적으로 발생하는 원인으로 여겨져서 활성화시키지 않았다.
     \subsubsection{dnsmasq.conf}
     \code{cpp}{dnsmasq.conf}{}{}{5pt}
     *.postech.ac.kr에 대해 WiFi router를 가리키도록 dns를 수정하여 *.postech.ac.kr를 향하는 패킷들이 라우터의 nginx로 들어오도록 만들었다.
-
+    다만, 현재 세팅으로는 무분별하게 패킷이 들어오기 때문에, 패킷이 WiFi AP 안에서 순환하다가 500 Internal Server Error를 일으킬 수 있으므로,
+    해당 문제가 발생하지 않도록 설정을 고도화할 필요가 있다.
 
     \section{토론 및 개선}
     \begin{itemize}
         \item \begin{beka}
                   Squid를 이용하여, 프록시를 구현할 때 웹 캐시도 같이 구현했지만,
                   그 용량이 실 사용량에 비해 너무 작아서 효율이 떨어질 것으로 생각된다.
-                  캐시를 저장할 외장 저장장치를 이용하여 해결할 수 있을 것이다.
+                  캐시를 저장할 외장 저장장치를 별도로 장착하여 해결할 수 있을 것이다.
         \end{beka}
         \item \begin{beka}
                   프록시를 이용하여 WiFi AP에 접속한 후 *.postech.ac.kr 사이트를 이용한다면,
