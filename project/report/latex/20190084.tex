@@ -62,7 +62,7 @@
 
 
     \author{\large 권민재, 20190084}
-    \title{\Large\textbf{CSED353: Compouter Network Term Project}}
+    \title{\Large\textbf{CSED353: Computer Network Term Project}}
     \date{\small July 3, 2020}
     \maketitle
     \newpage
@@ -72,30 +72,39 @@
 
     \newpage
     \section{개요}
-     본 프로젝트는 single board computer와 여러 소프트웨어를 활용하여 unique WiFi AP를 제작하는 프로젝트이다.
-     Raspberry Pi3 B 에 운영체제로 OpenWRT를 설치하고 여러 소프트웨어를 조합하여 WiFi AP를 제작하였다.
+    본 프로젝트는 single board computer와 여러 소프트웨어를 활용하여 unique WiFi AP를 제작하는 프로젝트이다.
+    이 프로젝트에서는 single board computer로 Raspberry Pi3 B 모델을 사용하였으며, OpenWrt를 운영체제로 사용하였다. \\
+    이 WiFi AP는 AP의 서브넷과의 동일한 환경을 제공하기 위한 VPN을 제공하며, caching을 지원하는 proxy server의 역할도 수행한다.
+    그리고 더 나아가, 포스텍 내 HTTP 사이트에 대한 캐싱도 이 AP가 수행할 수 있도록 기능을 추가하였다.
+    이러한 기능을 추가하기 위해 OpenVPN, Squid, NginX 등의 소프트웨어가 사용되었으며, 이들의 효율적인 관리를 위해 luci 또한 이용하였다.
+
 
     \section{구조}
 
-    \subsection{OpenWRT}
-     OpenWRT는 wireless router를 위한 리눅스 기반의 오픈 소스 운영체제이다. 이 프로젝트에서 Raspberry Pi의 운영체제로 선택하여 사용했다.
-     해당 운영체제는 '라우터'를 위한 운영체제라는 점에서 강점이 있다. 임베디드 보드에서 라우터 기능을 수행하기에는 성능적인 제약이 많기 때문에,
+    \subsection{OpenWrt}
+    OpenWrt는 wireless router를 위한 리눅스 기반의 오픈 소스 운영체제로, 이 프로젝트에서 Raspberry Pi의 운영체제로 사용했다.
+    많은 리눅스 배포판들 중에서 이 운영체제를 선택한 이유로는, 우선 이 운영체제는 '라우터'를 위한 운영체제라는 점을 꼽을 수 있다.
+    Raspberry Pi와 같은 임베디드 보드에서 라우터 기능을 수행하기에는 성능적인 제약이 많기 때문에,
     꼭 필요한 기능만 설치되어 있고, 가벼운 운영체제가 적합하기 때문이다. 게다가, OpenWRT로 라우터를 만드는 사람들이 많이 존재하기 때문에,
-     인터넷을 통해 많은 정보를 쉽게 접할 수 있다는 장점 또한 존재한다. 그래서 이번 프로젝트의 운영체제로 OpenWRT를 선택하였다.
+    인터넷을 통해 OpenWrt를 이용하여 AP를 제작하는데 있어서 많은 정보를 쉽게 접할 수 있다는 장점 또한 존재한다.
+    이러한 장점이 있기 때문에 이번 프로젝트의 운영체제로 OpenWRT를 선택하였다.
     \subsection{OpenVPN}
-     OpenVPN은 VPN을 제공하는 프로토콜과 프로그램을 일컫는다. OpenVPN은 OpenSSL을 이용하여 통신을 암호화하기 때문에 안전하고, 많은 플랫폼에서 사용할 수 있다는 장점이 있어서
-     OpenVPN을 이용하여 VPN 서버 기능을 이 WiFi AP에 탑재하였다.
+    OpenVPN은 VPN을 제공하는 프로토콜과 프로그램을 일컫는다.
+    VPN을 naive하게 직접 구현하는 것은 상당한 시간이 걸리고, 보안상 믿을 수 없는 시스템이 만들어질 수 있기 때문에,
+    대중화된 프로그램을 사용하는 것으로 결정하였다.
+    OpenVPN은 OpenSSL을 이용하여 통신을 암호화하기 때문에 안전하고, 많은 플랫폼에서 사용할 수 있다는 장점이 있어서
+    OpenVPN을 이용하여 VPN 서버 기능을 이 WiFi AP에 탑재하였다.
     \subsection{Squid}
-     Squid는 프록시 서버 역할을 수행하며, 부가적으로 웹 캐시의 기능도 한다.
-     하나의 프로그램으로 프록시와 웹 캐시 기능을 동시에 제공할 수 있다는 장점이 있어서 Squid를 이용하여 WiFi AP에 프록시 기능을 탑재하였다.
+    Squid는 프록시 서버 역할을 수행하며, 부가적으로 웹 캐시의 기능도 한다.
+    하나의 프로그램으로 프록시와 웹 캐시 기능을 동시에 제공할 수 있다는 장점이 있어서 Squid를 이용하여 WiFi AP에 프록시 기능을 탑재하였다.
     \subsection{Nginx}
-     Nginx는 최근 많이 사용되는 웹 서버 소프트웨어이다. Nginx는 다른 웹 서버 소프트웨어보다 강력한 리버스 프록시 기능을 제공한다.
-     Nginx의 해당 기능을 통해 WiFi AP의 사용자들에게 *.postech.ac.kr에 대한 웹 캐시를 제공하고자 한다.
+    Nginx는 최근 많이 사용되는 웹 서버 소프트웨어이다. Nginx는 다른 웹 서버 소프트웨어보다 강력한 리버스 프록시 기능을 제공한다.
+    Nginx의 해당 기능을 통해 WiFi AP의 사용자들에게 *.postech.ac.kr에 대한 웹 캐시를 제공하고자 한다.
     \section{기능}
     모든 파일의 내용은 설정 파일들 중 중요하다고 생각되는 일부 부분들만 발췌한 것이다.
     \subsection{Wifi Routed AP}
-     우선 lan과 wifi, 두 개의 인터페이스를 만들고, wifi에게 서브넷을 부여하였다. 그 후, wifi의 패킷을 lan으로 포워딩시키고,
-     lan에서 MASQUERADE를 통해 nat를 해석하게 만들어서 Routed WiFi AP 기능을 구현하였다.
+    우선 lan과 wifi, 두 개의 인터페이스를 만들고, wifi에게 서브넷을 부여하였다. 그 후, wifi의 패킷을 lan으로 포워딩시키고,
+    lan에서 MASQUERADE를 통해 nat를 해석하게 만들어서 Routed WiFi AP 기능을 구현하였다.
     \subsubsection{Interface}
     \textbf{lan}\\
     \code{cpp}{network}{10}{17}{5pt}
@@ -126,7 +135,7 @@
 
 
     \subsection{VPN}
-     VPN 시장에서 널리 사용되고 있는 OpenVPN을 활용하여 WiFi AP가 VPN Server의 역할 또한 수행할 수 있도록 만들었다.
+    VPN 시장에서 널리 사용되고 있는 OpenVPN을 활용하여 WiFi AP가 VPN Server의 역할 또한 수행할 수 있도록 만들었다.
     \subsubsection{openvpn}
     \code{cpp}{openvpn}{}{}{5pt}
     openvpn에서 주로 쓰는 포트인 1194번 포트에서 tcp 방식으로 vpn이 작동할 수 있도록 설정하였다.
@@ -139,7 +148,7 @@
     이때 내부 망의 ip를 해석하기 위해 MASQUERADE도 활성화하였다.
 
     \subsection{Proxy with Caching}
-     Squid를 이용하여 WiFi AP에 프록시 기능을 추가하였으며, 해당 프록시에서 Web caching을 할 수 있도록 설정하였다.
+    Squid를 이용하여 WiFi AP에 프록시 기능을 추가하였으며, 해당 프록시에서 Web caching을 할 수 있도록 설정하였다.
     \subsubsection{squid}
     \code{cpp}{squid.conf}{}{}{5pt}
     우선 acl을 통해 통신을 허용할 포트와 로컬 서브넷을 지정해주었다.
@@ -149,8 +158,8 @@
 
 
     \subsection{Caching}
-     dnsmasq.conf를 통해 *.postech.ac.kr로 가는 패킷을 192.168.2.1, 즉 WiFi AP로 우회시킨 다음에 nginx에서 캐시가 있다면 캐시를 돌려주고,
-     아닐 경우에 nginx에서 proxy path를 수행하게 하여 http에 대한 웹 캐시를 구현하였다.
+    dnsmasq.conf를 통해 *.postech.ac.kr로 가는 패킷을 192.168.2.1, 즉 WiFi AP로 우회시킨 다음에 nginx에서 캐시가 있다면 캐시를 돌려주고,
+    아닐 경우에 nginx에서 proxy path를 수행하게 하여 http에 대한 웹 캐시를 구현하였다.
     \subsubsection{nginx.conf}
     \code{cpp}{nginx.conf}{}{}{5pt}
     기본 resolver는 포스텍의 DNS로 설정하였으며, /nginx-cache/POSTECH/에 *.postech.ac.kr 페이지들의 캐시들이 저장되도록 설정하였다.
@@ -164,19 +173,19 @@
 
     \section{토론 및 개선}
     \begin{itemize}
-    \item \begin{beka}
-              Squid를 이용하여, 프록시를 구현할 때 웹 캐시도 같이 구현했지만,
-              그 용량이 실 사용량에 비해 너무 작아서 효율이 떨어질 것으로 생각된다.
-              캐시를 저장할 외장 저장장치를 이용하여 해결할 수 있을 것이다.
-    \end{beka}
-    \item \begin{beka}
-              프록시를 이용하여 WiFi AP에 접속한 후 *.postech.ac.kr 사이트를 이용한다면,
-              Squid와 Nginx에서 같은 내용의 캐시를 동시에 쌓기 때문에 퍼포먼스에 손해가 있을 것으로 생각된다.
-              nginx로 글로벌한 캐시를 마련하고, 프록시 환경에서의 웹 캐시를 삭제하는 것이 오히려 효율적일 것으로 예측된다.
-    \end{beka}
-    \item \begin{beka}
-              SSL 인증서와 관련하여 문제가 있어서 https 연결에 대해 nginx 캐시를 구현하지 못한 것이 아쉽다.
-    \end{beka}
+        \item \begin{beka}
+                  Squid를 이용하여, 프록시를 구현할 때 웹 캐시도 같이 구현했지만,
+                  그 용량이 실 사용량에 비해 너무 작아서 효율이 떨어질 것으로 생각된다.
+                  캐시를 저장할 외장 저장장치를 이용하여 해결할 수 있을 것이다.
+        \end{beka}
+        \item \begin{beka}
+                  프록시를 이용하여 WiFi AP에 접속한 후 *.postech.ac.kr 사이트를 이용한다면,
+                  Squid와 Nginx에서 같은 내용의 캐시를 동시에 쌓기 때문에 퍼포먼스에 손해가 있을 것으로 생각된다.
+                  nginx로 글로벌한 캐시를 마련하고, 프록시 환경에서의 웹 캐시를 삭제하는 것이 오히려 효율적일 것으로 예측된다.
+        \end{beka}
+        \item \begin{beka}
+                  SSL 인증서와 관련하여 문제가 있어서 https 연결에 대해 nginx 캐시를 구현하지 못한 것이 아쉽다.
+        \end{beka}
     \end{itemize}
     \section{참고문헌}
     \begin{itemize}
